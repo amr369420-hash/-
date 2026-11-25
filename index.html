@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أفراح السادة الأشراف</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #060d18;
+            --bg-card: #0c1829;
+            --gold-1: #fff1b8;
+            --gold-2: #dfb147;
+            --gold-3: #9a6b19;
+            --text-main: #f8f5ee;
+            --text-soft: #cfc7b6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 20% 15%, rgba(223, 177, 71, 0.14), transparent 40%),
+                radial-gradient(circle at 80% 85%, rgba(223, 177, 71, 0.12), transparent 45%),
+                linear-gradient(160deg, #050a12 0%, #091322 55%, #04080f 100%);
+            font-family: 'Cairo', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            overflow-x: hidden;
+            perspective: 1300px;
+        }
+
+        #spark-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .scene {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 570px;
+            transition: transform 0.18s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        .card {
+            position: relative;
+            background: linear-gradient(150deg, rgba(16, 31, 53, 0.92), rgba(7, 14, 24, 0.96));
+            border-radius: 28px;
+            padding: 46px 28px 38px;
+            text-align: center;
+            border: 1.5px solid rgba(223, 177, 71, 0.45);
+            box-shadow:
+                0 30px 70px rgba(0, 0, 0, 0.75),
+                0 0 45px rgba(223, 177, 71, 0.14),
+                inset 0 0 35px rgba(223, 177, 71, 0.06);
+            backdrop-filter: blur(14px);
+            overflow: hidden;
+        }
+
+        /* إطار داخلي مزدوج */
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(223, 177, 71, 0.28);
+            pointer-events: none;
+        }
+
+        /* شعاع ضوئي متحرك */
+        .light-sweep {
+            position: absolute;
+            top: 0;
+            left: -140%;
+            width: 85%;
+            height: 100%;
+            background: linear-gradient(
+                110deg,
+                transparent 20%,
+                rgba(255, 241, 184, 0.09) 50%,
+                transparent 80%
+            );
+            transform: skewX(-22deg);
+            animation: sweep 6.5s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes sweep {
+            0% { left: -140%; }
+            45% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        /* زوايا زخرفية */
+        .corner-svg {
+            position: absolute;
+            width: 58px;
+            height: 58px;
+            fill: none;
+            stroke: var(--gold-2);
+            stroke-width: 1.5;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        .tl { top: 18px; left: 18px; }
+        .tr { top: 18px; right: 18px; transform: scaleX(-1); }
+        .bl { bottom: 18px; left: 18px; transform: scaleY(-1); }
+        .br { bottom: 18px; right: 18px; transform: scale(-1, -1); }
+
+        .top-badge {
+            display: inline-block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--gold-1);
+            background: rgba(223, 177, 71, 0.12);
+            border: 1px solid rgba(223, 177, 71, 0.35);
+            padding: 5px 18px;
+            border-radius: 999px;
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: rise 0.7s ease forwards 0.15s;
+        }
+
+        /* السطر الأول: عنوان الفرح */
+        .title {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: clamp(2.3rem, 6.5vw, 3.3rem);
+            font-weight: 700;
+            line-height: 1.35;
+            background: linear-gradient(180deg, var(--gold-1) 0%, var(--gold-2) 55%, var(--gold-3) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 14px rgba(223, 177, 71, 0.28));
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: rise 0.8s ease forwards 0.35s;
+        }
+
+        .ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 72%;
+            margin: 14px auto 22px;
+            opacity: 0;
+            animation: rise 0.8s ease forwards 0.55s;
+        }
+
+        .ornament .line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-2), transparent);
+        }
+
+        .ornament .gem {
+            width: 9px;
+            height: 9px;
+            background: var(--gold-1);
+            transform: rotate(45deg);
+            box-shadow: 0 0 12px var(--gold-2);
+        }
+
+        /* السطر الثاني */
+        .line-two {
+            font-family: 'Amiri', serif;
+            font-size: clamp(1.3rem, 3.9vw, 1.68rem);
+            line-height: 1.85;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: rise 0.8s ease forwards 0.75s;
+        }
+
+        /* السطر الثالث: التاريخ */
+        .date-pill {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(223, 177, 71, 0.16), rgba(154, 107, 25, 0.08));
+            border: 1px solid rgba(223, 177, 71, 0.55);
+            border-radius: 16px;
+            padding: 14px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            animation: rise 0.8s ease forwards 0.95s;
+        }
+
+        .date-pill .date-text {
+            font-size: clamp(1.2rem, 3.8vw, 1.5rem);
+            font-weight: 800;
+            color: var(--gold-1);
+        }
+
+        /* السطر الرابع: الداعي */
+        .host-box {
+            margin-bottom: 22px;
+            opacity: 0;
+            animation: rise 0.8s ease forwards 1.15s;
+        }
+
+        .host-box .host-name {
+            font-family: 'Amiri', serif;
+            font-size: clamp(1.35rem, 4vw, 1.72rem);
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* السطر الخامس: المقابلين */
+        .welcomers {
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(223, 177, 71, 0.28);
+            border-bottom: 1px solid rgba(223, 177, 71, 0.28);
+            border-radius: 12px;
+            padding: 13px 16px;
+            font-size: clamp(1.05rem, 3.3vw, 1.22rem);
+            font-weight: 700;
+            color: var(--gold-1);
+            margin-bottom: 18px;
+            opacity: 0;
+            animation: rise 0.8s ease forwards 1.35s;
+        }
+
+        /* السطر الأخير: عنوان الحفل */
+        .location-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(223, 177, 71, 0.09);
+            border: 1px dashed rgba(223, 177, 71, 0.45);
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            font-weight: 700;
+            color: var(--text-main);
+            opacity: 0;
+            animation: rise 0.8s ease forwards 1.5s;
+        }
+
+        .location-box svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--gold-2);
+            flex-shrink: 0;
+        }
+
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            opacity: 0;
+            animation: rise 0.8s ease forwards 1.65s;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 22px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+            color: #07101c;
+            box-shadow: 0 6px 20px rgba(223, 177, 71, 0.3);
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 26px rgba(223, 177, 71, 0.45);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--gold-1);
+            border: 1px solid rgba(223, 177, 71, 0.55);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(223, 177, 71, 0.14);
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media print {
+            body { background: #07101c !important; -webkit-print-color-adjust: exact; }
+            #spark-canvas, .actions { display: none !important; }
+            .card { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="spark-canvas"></canvas>
+
+    <div class="scene" id="scene">
+        <div class="card">
+            <div class="light-sweep"></div>
+
+            <svg class="corner-svg tl" viewBox="0 0 60 60">
+                <path d="M2 58 V18 C2 9 9 2 18 2 H58" />
+                <path d="M10 50 V22 C10 15 15 10 22 10 H50" stroke-opacity="0.45" />
+                <circle cx="18" cy="18" r="3" fill="#dfb147" />
+            </svg>
+            <svg class="corner-svg tr" viewBox="0 0 60 60">
+                <path d="M2 58 V18 C2 9 9 2 18 2 H58" />
+                <path d="M10 50 V22 C10 15 15 10 22 10 H50" stroke-opacity="0.45" />
+                <circle cx="18" cy="18" r="3" fill="#dfb147" />
+            </svg>
+            <svg class="corner-svg bl" viewBox="0 0 60 60">
+                <path d="M2 58 V18 C2 9 9 2 18 2 H58" />
+                <path d="M10 50 V22 C10 15 15 10 22 10 H50" stroke-opacity="0.45" />
+                <circle cx="18" cy="18" r="3" fill="#dfb147" />
+            </svg>
+            <svg class="corner-svg br" viewBox="0 0 60 60">
+                <path d="M2 58 V18 C2 9 9 2 18 2 H58" />
+                <path d="M10 50 V22 C10 15 15 10 22 10 H50" stroke-opacity="0.45" />
+                <circle cx="18" cy="18" r="3" fill="#dfb147" />
+            </svg>
+
+            <div class="top-badge">دعوة كريمة</div>
+
+            <!-- السطر الأول -->
+            <h1 class="title">افراح الساده الاشراف</h1>
+
+            <div class="ornament">
+                <span class="line"></span>
+                <span class="gem"></span>
+                <span class="line"></span>
+            </div>
+
+            <!-- السطر الثاني -->
+            <p class="line-two">يتشرف بدعودتكم الحاج عبدالحليم وأولاده لحضور حفل الحنه وكرم الضيافه</p>
+
+            <!-- السطر الثالث -->
+            <div class="date-pill">
+                <div class="date-text">يوم الخميس 10/12/2026</div>
+            </div>
+
+            <!-- السطر الرابع -->
+            <div class="host-box">
+                <div class="host-name">الداعى لكم الاستاذ سيد عبدالحليم</div>
+            </div>
+
+            <!-- السطر الخامس -->
+            <div class="welcomers">المقابلين جميع شباب الاشراف</div>
+
+            <!-- السطر الأخير: العنوان -->
+            <div class="location-box">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <span>العنوان: مركز الواسطى قرية الحومه شارع الاشراف</span>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-gold" onclick="shareInvite()">مشاركة الدعوة</button>
+                <button class="btn btn-ghost" onclick="window.print()">حفظ / طباعة</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scene = document.getElementById('scene');
+        document.addEventListener('mousemove', (e) => {
+            const rx = (window.innerHeight / 2 - e.pageY) / 38;
+            const ry = (window.innerWidth / 2 - e.pageX) / 38;
+            scene.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+        });
+
+        document.addEventListener('mouseleave', () => {
+            scene.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        });
+
+        function shareInvite() {
+            const message =
+                "افراح الساده الاشراف\n\n" +
+                "يتشرف بدعودتكم الحاج عبدالحليم وأولاده لحضور حفل الحنه وكرم الضيافه\n" +
+                "يوم الخميس 10/12/2026\n" +
+                "الداعى لكم الاستاذ سيد عبدالحليم\n" +
+                "المقابلين جميع شباب الاشراف\n" +
+                "العنوان: مركز الواسطى قرية الحومه شارع الاشراف";
+
+            if (navigator.share) {
+                navigator.share({ title: "افراح الساده الاشراف", text: message });
+            } else {
+                navigator.clipboard.writeText(message);
+                alert("تم نسخ نص الدعوة بنجاح.");
+            }
+        }
+
+        const canvas = document.getElementById('spark-canvas');
+        const ctx = canvas.getContext('2d');
+        let sparks = [];
+
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', setCanvasSize);
+        setCanvasSize();
+
+        class Spark {
+            constructor() {
+                this.reset(true);
+            }
+            reset(randomY = false) {
+                this.x = Math.random() * canvas.width;
+                this.y = randomY ? Math.random() * canvas.height : canvas.height + 10;
+                this.r = Math.random() * 2.2 + 0.6;
+                this.vy = -(Math.random() * 0.45 + 0.15);
+                this.vx = (Math.random() - 0.5) * 0.35;
+                this.alpha = Math.random() * 0.7 + 0.2;
+            }
+            update() {
+                this.y += this.vy;
+                this.x += this.vx;
+                if (this.y < -10) this.reset(false);
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 241, 184, ${this.alpha})`;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#dfb147';
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 60; i++) sparks.push(new Spark());
+
+        function renderSparks() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            sparks.forEach(s => {
+                s.update();
+                s.draw();
+            });
+            requestAnimationFrame(renderSparks);
+        }
+        renderSparks();
+    </script>
+</body>
+</html>
